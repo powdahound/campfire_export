@@ -52,17 +52,23 @@ module CampfireExport
       "%02d" % number
     end
 
-    # Requires that room and date be defined in the calling object.
+    # If room or date are defined in the calling object they will be used to
+    # build a more accurate directory.
     def export_dir
-      "campfire/#{Account.subdomain}/#{room.name}/" +
-        "#{date.year}/#{zero_pad(date.mon)}/#{zero_pad(date.day)}"
+      dir = "campfire/#{Account.subdomain}"
+      if defined? room:
+        dir += "/#{room.name}"
+      end
+      if defined? date:
+        dir += "/#{date.year}/#{zero_pad(date.mon)}/#{zero_pad(date.day)}"
+      end
+      dir
     end
 
-    # Requires that room_name and date be defined in the calling object.    
     def export_file(content, filename, mode='w')
       # Check to make sure we're writing into the target directory tree.
       true_path = File.expand_path(File.join(export_dir, filename))
-      
+
       unless true_path.start_with?(File.expand_path(export_dir))
         raise CampfireExport::Exception.new("#{export_dir}/#{filename}",
           "can't export file to a directory higher than target directory; " +
@@ -151,6 +157,18 @@ module CampfireExport
     def rooms
       doc = Nokogiri::XML get('/rooms.xml').body
       doc.css('room').map {|room_xml| Room.new(room_xml) }
+    end
+
+    def export_rooms_list
+      begin
+        log(:info, "Exporting rooms list ... ")
+        FileUtils.mkdir_p export_dir
+        xml = Nokogiri::XML get('/rooms.xml').body
+        export_file(xml, 'rooms.xml')
+        log(:info, "ok\n")
+      rescue Exception => e
+        log(:error, "Exporting rooms list failed", e)
+      end
     end
   end
 

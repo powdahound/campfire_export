@@ -57,8 +57,9 @@ begin
   account = CampfireExport::Account.new(config['subdomain'], 
                                         config['api_token'])
   account.find_timezone
+  account.export_rooms_list
   account.rooms.each do |room|
-    room.export(config_date(config, 'start_date'), 
+    room.export(config_date(config, 'start_date'),
                 config_date(config, 'end_date'))
   end
 rescue => e
