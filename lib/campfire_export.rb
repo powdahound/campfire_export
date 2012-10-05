@@ -137,9 +137,10 @@ module CampfireExport
     @api_token = ""
     @base_url  = ""
     @timezone  = nil
+    @user_ids  = []
     
     class << self
-      attr_accessor :subdomain, :api_token, :base_url, :timezone
+      attr_accessor :subdomain, :api_token, :base_url, :timezone, :user_ids
     end
     
     def initialize(subdomain, api_token)
@@ -170,6 +171,29 @@ module CampfireExport
         log(:error, "Exporting rooms list failed", e)
       end
     end
+
+    def export_users_list
+      # Campfire doesn't provide a /users.xml API to get all the users, so
+      # we'll accumulate the list of user_ids seen in room messages and then
+      # query each one individually to simulate it.
+      # This won't be of any use unless run after exporting room transcripts.
+      doc = Nokogiri::XML.parse('<users type="array"></users>', nil, 'UTF-8')
+      users_node = doc.css('users').first
+
+      begin
+        log(:info, "Exporting users list ... ")
+        FileUtils.mkdir_p export_dir
+        Account.user_ids.each do |user_id|
+          xml = Nokogiri::XML get("/users/#{user_id}.xml").body
+          users_node.add_child(xml.css('user'))
+        end
+        export_file(doc, 'users.xml')
+        log(:info, "ok\n")
+      rescue Exception => e
+        log(:error, "Exporting users list failed", e)
+      end
+    end
+
   end
 
   class Room
@@ -344,6 +368,12 @@ module CampfireExport
       rescue Exception => e
         "[unknown user]"
       else
+        # Record this as a user_id we've seen in the account's rooms. Since
+        # Campfire doesn't provide a /users.xml API (wtf), we record all the
+        # IDs we've seen and then use them to export a list of users.
+        # See Account.export_users_list()
+        Account.user_ids.push(user_id)
+
         # Take the first name and last initial, if there is more than one name.
         name_parts = doc.css('name').text.split
         if name_parts.length > 1
