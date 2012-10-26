@@ -102,7 +102,8 @@ module CampfireExport
       when :error
         short_error = ["*** Error: #{message}", exception].compact.join(": ")
         $stderr.puts short_error
-        open("campfire/export_errors.txt", 'a') do |log|
+        dir = "#{Account.export_basedir}/#{Account.subdomain}"
+        open("#{dir}/export_errors.txt", 'a') do |log|
           log.write short_error
           unless exception.nil?
             log.write %Q{\n\t#{exception.backtrace.join("\n\t")}}
