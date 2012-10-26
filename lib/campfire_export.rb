@@ -55,7 +55,7 @@ module CampfireExport
     # If room or date are defined in the calling object they will be used to
     # build a more accurate directory.
     def export_dir
-      dir = "campfire/#{Account.subdomain}"
+      dir = "#{Account.export_basedir}/#{Account.subdomain}"
       if defined? room:
         dir += "/#{room.name}"
       end
@@ -136,17 +136,20 @@ module CampfireExport
     @subdomain = ""
     @api_token = ""
     @base_url  = ""
+    @export_basedir = ""
     @timezone  = nil
     @user_ids  = []
     
     class << self
-      attr_accessor :subdomain, :api_token, :base_url, :timezone, :user_ids
+      attr_accessor :subdomain, :api_token, :base_url, :export_basedir,
+                    :timezone, :user_ids
     end
     
-    def initialize(subdomain, api_token)
+    def initialize(subdomain, api_token, export_basedir)
       Account.subdomain = subdomain
       Account.api_token = api_token
       Account.base_url  = "https://#{subdomain}.campfirenow.com"
+      Account.export_basedir = export_basedir
     end
 
     def find_timezone

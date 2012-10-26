@@ -51,6 +51,10 @@ directory using this template:
     # Your Campfire API token (see "My Info" on your Campfire site).
     api_token:  abababababababababababababababababababab
 
+    # OPTIONAL: Export base dir - location to store the export files.
+    # Uncomment to set.
+    #export_basedir: ~/campfire_export/
+
     # OPTIONAL: Export start date - the first transcript you want exported.
     # Uncomment to set. Defaults to the date each room was created.
     #start_date: 2010/1/1
@@ -67,13 +71,14 @@ Campfire room was created, until the date of the last message in that room.
 ## Exporting ##
 
 Just run `campfire_export` and your transcripts will be exported into a
-`campfire` directory in the current directory, with subdirectories for each
-site/room/year/month/day. In those directories, any uploaded files will be
-saved with their original filenames, in a directory named for the upload ID
-(since transcripts often have the same filename uploaded multiple times, e.g.
-`Picture 1.png`). (Note that rooms and uploaded files may have odd filenames
--- for instance, spaces in the file/directory names.) Errors that happen
-trying to export will be logged to `campfire/export_errors.txt`.
+`campfire` directory in the current directory (or your `export_basedir`
+setting), with subdirectories for each site/room/year/month/day. In those
+directories, any uploaded files will be saved with their original filenames,
+in a directory named for the upload ID (since transcripts often have the same
+filename uploaded multiple times, e.g. `Picture 1.png`). (Note that rooms and
+uploaded files may have odd filenames -- for instance, spaces in the
+file/directory names.) Errors that happen trying to export will be logged to
+`campfire/export_errors.txt`.
 
 The Gist I forked had a plaintext transcript export, which I've kept in as
 `transcript.txt` in each directory. However, the original XML and HTML are now

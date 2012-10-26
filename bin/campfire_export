@@ -53,9 +53,13 @@ ensure_config_for(config, 'subdomain',
 ensure_config_for(config, 'api_token',
   "Your Campfire API token (see 'My Info' on your Campfire site)")
 
+export_dir = 'campfire'
+export_dir = config['export_basedir'] unless config['export_basedir'].nil?
+
 begin
-  account = CampfireExport::Account.new(config['subdomain'], 
-                                        config['api_token'])
+  account = CampfireExport::Account.new(config['subdomain'],
+                                        config['api_token'],
+                                        export_dir)
   account.find_timezone
   account.rooms.each do |room|
     room.export(config_date(config, 'start_date'),
